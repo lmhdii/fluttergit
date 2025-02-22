@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo 4'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page Test modif sur Git'),
     );
   }
 }
