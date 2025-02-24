@@ -1,30 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:your_project_name/main.dart';
 
-import 'package:my_flutter_app_1/main.dart';
+void main() async {
+  setupFirebaseMocks();
 
-void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Test Firestore integration', (WidgetTester tester) async {
+    // Initialiser Fake Firestore
+    final firestore = FakeFirebaseFirestore();
+    
+    // Ajouter des données de test
+    await firestore.collection('users').add({
+      'name': 'Test User',
+      'timestamp': Timestamp.now(),
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Construire notre widget
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FirestoreDemo(firestore: firestore),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Vérifier l'affichage des données
+    expect(find.text('Test User'), findsOneWidget);
+    
+    // Tester l'ajout de données
+    await tester.enterText(find.byType(TextField), 'Nouvel Utilisateur');
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Vérifier la nouvelle entrée
+    expect(find.text('Nouvel Utilisateur'), findsOneWidget);
   });
+}
+
+// Configuration des mocks Firebase
+void setupFirebaseMocks() async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 }
