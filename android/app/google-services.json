@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "620107297220",
+    "project_id": "monprojet-learnflow",
+    "storage_bucket": "monprojet-learnflow.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:620107297220:android:aee117af5445afccb83491",
+        "android_client_info": {
+          "package_name": "com.example.my_flutter_app_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcMp-CoUpnyYN83CsEpuIM50jxSiwtOSk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
