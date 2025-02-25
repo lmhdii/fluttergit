@@ -1,95 +1,55 @@
+// Import des packages nécessaires pour le testing
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_flutter_app_1/main.dart';
+import 'package:my_flutter_app_1/pages/home_page.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+// Mock de Firebase pour les tests (nécessite firebase_core 2.14.0+)
+void setupFirebaseMocks() async {
+  TestWidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Firestore Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: FirestoreDemo(),
-    );
-  }
-}
+void main() {
+  // Initialisation des mocks Firebase avant tous les tests
+  setUpAll(() async {
+    await setupFirebaseMocks();
+  });
 
-class FirestoreDemo extends StatefulWidget {
-  @override
-  _FirestoreDemoState createState() => _FirestoreDemoState();
-}
+  group('Test du widget principal MyApp', () {
+    testWidgets('Test de l\'affichage initial avec Firebase', (WidgetTester tester) async {
+      // Construction de notre widget et déclenchement du rendu
+      await tester.pumpWidget(const MyApp());
 
-class _FirestoreDemoState extends State<FirestoreDemo> {
-  final TextEditingController _nameController = TextEditingController();
-  final CollectionReference _users = 
-      FirebaseFirestore.instance.collection('users');
+      // Vérification 1: Le MaterialApp est bien présent avec la bonne configuration
+      expect(
+        find.byType(MaterialApp),
+        findsOneWidget,
+        reason: 'Le MaterialApp racine doit être présent',
+      );
 
-  Future<void> _addUser() async {
-    try {
-      await _users.add({
-        'name': _nameController.text,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      _nameController.clear();
-    } catch (e) {
-      print("Erreur d'ajout: $e");
-    }
-  }
+      // Vérification 2: Le debug banner est bien désactivé
+      final materialApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
+      expect(materialApp.debugShowCheckedModeBanner, isFalse);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Firestore Demo')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Entrez un nom',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _addUser,
-              child: Text('Ajouter à Firestore'),
-            ),
-            SizedBox(height: 40),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _users.orderBy('timestamp').snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Erreur: ${snapshot.error}');
-                  }
+      // Vérification 3: La HomePage est bien chargée
+      expect(
+        find.byType(HomePage),
+        findsOneWidget,
+        reason: 'La HomePage doit être le widget initial',
+      );
 
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+      // Vérification 4: Firebase est bien initialisé
+      expect(Firebase.app(), isNotNull, reason: 'Firebase doit être initialisé');
+    });
 
-                  return ListView(
-                    children: snapshot.data!.docs.map((DocumentSnapshot doc) {
-                      Map<String, dynamic> data = 
-                          doc.data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(data['name'] ?? ''),
-                        subtitle: Text('ID: ${doc.id}'),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    testWidgets('Test de la navigation de base', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Vérification que la barre d'app est présente avec le bon titre
+      expect(find.byType(AppBar), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget); // Adaptez selon votre HomePage
+    });
+  });
 }
