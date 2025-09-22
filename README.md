@@ -1,6 +1,6 @@
 # my_flutter_app_1
 
-A new Flutter project.
+A test to understand how Flutter project are structured.
 
 ## Getting Started
 
